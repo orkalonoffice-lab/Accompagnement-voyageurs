@@ -1,0 +1,1540 @@
+<!doctype html>
+<html lang="fr" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur Prix Transport YUL</title>
+  <meta name="description" content="Calcul automatique du prix transport + emballage valises Montréal">
+  <meta name="theme-color" content="#1e3a8a">
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ2FsY3VsIFByaXggVHJhbnNwb3J0IFlVTCIsInNob3J0X25hbWUiOiJZVUwgUHJpeCIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMWUzYThhIiwidGhlbWVfY29sb3IiOiIjMWUzYThhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyBmaWxsPSclMjMxZTNhOGEnJTNFJTNDL3JlY3QlM0UlM0N0ZXh0IHg9JzUwJyB5PSc2MCcgZm9udC1zaXplPSc0MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZmlsbD0nd2hpdGUnJTNFJUUyJTlDJTg4JTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDemoKey&amp;libraries=places"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    
+    .gradient-hero {
+      background: linear-gradient(135deg, #0c1e3e 0%, #1e3a8a 30%, #3b82f6 70%, #1e40af 100%);
+    }
+    
+    .card-shadow {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .input-focus:focus {
+      outline: none;
+      ring: 2px;
+      ring-color: #3b82f6;
+      border-color: #3b82f6;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .whatsapp-btn {
+      background: #25D366;
+      animation: pulse-green 2s infinite;
+    }
+    
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.4); }
+      50% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+    }
+    
+    .price-display {
+      font-size: 2.25rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .step-indicator {
+      transition: all 0.3s ease;
+    }
+    
+    .step-active {
+      background: #16a34a;
+      color: white;
+    }
+    
+    .step-completed {
+      background: #22c55e;
+      color: white;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .toast {
+      animation: toastIn 0.3s ease-out;
+    }
+    
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(100%); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .pac-container {
+      display: none !important;
+    }
+    
+    .pac-item {
+      display: none !important;
+    }
+    
+    .pac-item:hover {
+      display: none !important;
+    }
+    
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: #d1fae5; color: #065f46; }
+    .status-completed { background: #dbeafe; color: #1e40af; }
+    
+    /* PAGE MANAGEMENT - FULLSCREEN SLIDES */
+    .page-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: white;
+    }
+    
+    .page-slide {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s ease;
+    }
+    
+    /* AUTH PAGE - START STATE */
+    #auth-page {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    
+    #auth-page.page-hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    /* LOGIN PAGE */
+    #login-page {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    #login-page.page-active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    
+    /* ADMIN LOGIN PAGE */
+    #admin-login-page {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    #admin-login-page.page-active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    
+    /* USER DASHBOARD */
+    #user-dashboard {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    #user-dashboard.page-active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    
+    /* CLIENT PAGE (CALCULATOR) */
+    #client-page {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    #client-page.page-active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    
+    /* ADMIN PAGE */
+    #admin-page {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    #admin-page.page-active {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 20;
+    }
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full bg-slate-50">
+  <div id="app" class="page-wrapper">
+   <!-- AUTH PAGE (LANDING PAGE) -->
+   <div id="auth-page" class="page-slide min-h-full">
+    <header class="gradient-hero text-white py-12 px-4">
+     <div class="max-w-lg mx-auto text-center">
+      <div class="text-6xl mb-4">
+       ✈️
+      </div>
+      <h1 class="text-4xl font-bold mb-3">Service Personnel Professionnel</h1>
+      <p class="text-yellow-300 text-xl font-semibold mb-2">Votre accompagnateur de confiance</p>
+      <p class="text-blue-100 text-base">Emballage de valises, accompagnement à l'aéroport YUL et bien plus</p>
+     </div>
+    </header>
+    <div class="max-w-lg mx-auto px-4 py-8">
+     <div class="space-y-4">
+      <button id="client-login-btn" class="btn-primary w-full py-5 rounded-2xl text-white font-bold text-xl flex items-center justify-center gap-3">👤 Espace client</button> <button id="new-booking-home-btn" class="w-full py-5 rounded-2xl bg-white border-3 border-blue-600 text-blue-600 font-bold text-xl hover:bg-blue-50">✈️ Réserver maintenant</button>
+     </div>
+    </div>
+   </div><!-- LOGIN/SIGNUP PAGE -->
+   <div id="login-page" class="page-slide min-h-full">
+    <header class="gradient-hero text-white py-8 px-4">
+     <div class="max-w-lg mx-auto flex items-center"><button id="back-to-home-auth" class="text-3xl mr-3 hover:scale-110 transition">←</button>
+      <div class="flex-1 text-center">
+       <h1 class="text-2xl font-bold">Espace Client</h1>
+      </div>
+     </div>
+    </header>
+    <div class="max-w-lg mx-auto px-4 py-8">
+     <!-- LOGIN FORM -->
+     <div id="login-form-container" class="bg-white rounded-2xl p-6 card-shadow">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Se connecter</h2>
+      <form id="login-form" class="space-y-4">
+       <div>
+        <label for="login-email" class="block text-sm font-medium text-slate-700 mb-2">Adresse courriel</label> <input type="email" id="login-email" required placeholder="vous@exemple.com" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div>
+        <label for="login-password" class="block text-sm font-medium text-slate-700 mb-2">Mot de passe</label> <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div id="login-error" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-sm"></div><button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-bold text-lg">Se connecter</button>
+      </form>
+      <div class="mt-6 text-center">
+       <p class="text-slate-600">Pas encore de compte ? <button type="button" id="switch-to-signup" class="text-blue-600 font-semibold hover:underline">S'inscrire</button></p>
+      </div>
+     </div><!-- SIGNUP FORM -->
+     <div id="signup-form-container" class="hidden bg-white rounded-2xl p-6 card-shadow">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Créer un compte</h2>
+      <form id="signup-form" class="space-y-4">
+       <div>
+        <label for="signup-email" class="block text-sm font-medium text-slate-700 mb-2">Adresse courriel</label> <input type="email" id="signup-email" required placeholder="vous@exemple.com" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div>
+        <label for="signup-password" class="block text-sm font-medium text-slate-700 mb-2">Mot de passe</label> <input type="password" id="signup-password" required placeholder="••••••••" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div>
+        <label for="signup-password-confirm" class="block text-sm font-medium text-slate-700 mb-2">Confirmer mot de passe</label> <input type="password" id="signup-password-confirm" required placeholder="••••••••" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div id="signup-error" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-sm"></div><button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-bold text-lg">S'inscrire</button>
+      </form>
+      <div class="mt-6 text-center">
+       <p class="text-slate-600">Déjà inscrit ? <button type="button" id="switch-to-login" class="text-blue-600 font-semibold hover:underline">Se connecter</button></p>
+      </div>
+     </div>
+    </div>
+   </div><!-- USER DASHBOARD -->
+   <div id="user-dashboard" class="page-slide min-h-full pb-24">
+    <header class="gradient-hero text-white py-6 px-4 sticky top-0 z-20">
+     <div class="max-w-lg mx-auto flex items-center justify-between">
+      <div>
+       <h1 class="text-2xl font-bold">Mon espace</h1>
+       <p id="user-email-display" class="text-blue-100 text-sm mt-1">--</p>
+      </div><button id="logout-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-semibold">Déconnexion</button>
+     </div>
+    </header>
+    <div class="max-w-lg mx-auto px-4 py-6">
+     <!-- QUICK ACTIONS -->
+     <div class="grid grid-cols-2 gap-3 mb-6">
+      <button id="new-booking-btn" class="bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition"> ✈️ Nouvelle réservation </button> <button id="view-profile-btn" class="bg-slate-200 text-slate-800 py-4 rounded-xl font-bold hover:bg-slate-300 transition"> 👤 Mon profil </button>
+     </div><!-- MY RESERVATIONS -->
+     <div class="bg-white rounded-2xl p-6 card-shadow">
+      <h2 class="text-xl font-bold text-slate-800 mb-4">📋 Mes réservations</h2>
+      <div id="user-reservations-list" class="space-y-3">
+       <div class="text-center py-8 text-slate-500">
+        <div class="text-4xl mb-2">
+         📭
+        </div> Aucune réservation pour le moment
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- CLIENT PAGE -->
+   <div id="client-page" class="page-slide min-h-full pb-24">
+    <!-- PROFILE WIDGET - TOP RIGHT -->
+    <div id="profile-widget" class="fixed top-4 right-4 z-50">
+     <!-- CONNECTED STATE -->
+     <div id="profile-connected" class="hidden bg-yellow-400 rounded-2xl p-3 card-shadow shadow-xl">
+      <div class="flex items-center gap-2 relative">
+       <div id="profile-avatar" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        A
+       </div>
+       <div class="flex-1 min-w-0">
+        <div id="profile-name" class="font-semibold text-slate-800 text-xs truncate">
+         --
+        </div>
+        <div id="profile-phone" class="text-xs text-slate-600 truncate">
+         --
+        </div>
+       </div><button id="profile-menu-toggle" class="ml-1 text-slate-700 hover:text-slate-900 transition text-sm px-1">▼</button> <!-- DROPDOWN MENU -->
+       <div id="profile-menu" class="hidden absolute top-full right-0 mt-2 bg-white rounded-xl card-shadow w-48 py-1 z-50">
+        <button onclick="goToUserReservations()" class="w-full text-left px-3 py-2 hover:bg-yellow-50 text-slate-800 text-sm font-medium transition flex items-center gap-2"> <span>📋</span> Mes réservations </button> <button id="view-profile-client-btn" class="w-full text-left px-3 py-2 hover:bg-yellow-50 text-slate-800 text-sm font-medium transition flex items-center gap-2"> <span>👤</span> Mon profil </button>
+        <div class="border-t my-1"></div><button id="logout-client-btn" class="w-full text-left px-3 py-2 hover:bg-red-50 text-red-600 text-sm font-medium transition flex items-center gap-2"> <span>🚪</span> Déconnexion </button>
+       </div>
+      </div>
+     </div><!-- NOT CONNECTED STATE -->
+     <div id="profile-guest" class="bg-yellow-400 rounded-xl p-3 card-shadow shadow-xl">
+      <button id="login-from-client-btn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold transition-all text-xs"> 👤 SE CONNECTER </button>
+     </div>
+    </div>
+    <header class="gradient-hero text-white py-8 px-4">
+     <div class="max-w-lg mx-auto text-center">
+      <div class="text-5xl mb-3">
+       ✈️
+      </div>
+      <h1 class="text-3xl font-bold mb-2">Service Personnel Professionnel</h1>
+      <p class="text-yellow-300 text-lg font-semibold mb-4">Votre accompagnateur de confiance</p>
+      <p class="text-blue-100 text-base mb-6">Emballage de valises, accompagnement à l'aéroport YUL et bien plus — Rive-Sud, Montréal</p>
+      <div class="flex items-center justify-center gap-2 text-yellow-300 font-semibold">
+       <span>📍 Rive-Sud → YUL</span> <span>•</span> <span>✅ Disponible maintenant</span>
+      </div>
+     </div>
+    </header>
+    <div class="bg-white border-b sticky top-0 z-10">
+     <div class="max-w-lg mx-auto px-4 py-3">
+      <div class="flex items-center justify-center gap-2">
+       <div id="step1-indicator" class="step-indicator step-active w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white">
+        1
+       </div>
+       <div class="w-12 h-1 bg-slate-200 rounded" id="progress-bar-1"></div>
+       <div id="step2-indicator" class="step-indicator bg-slate-200 text-slate-500 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+        2
+       </div>
+       <div class="w-12 h-1 bg-slate-200 rounded" id="progress-bar-2"></div>
+       <div id="step3-indicator" class="step-indicator bg-slate-200 text-slate-500 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+        3
+       </div>
+      </div>
+      <div class="flex justify-between text-xs text-slate-500 mt-1 px-2">
+       <span>Trajet</span> <span>Détails</span> <span>Résumé</span>
+      </div>
+     </div>
+    </div><!-- STEP 1: TRAJET -->
+    <div id="step1" class="max-w-lg mx-auto px-4 py-6 fade-in">
+     <form id="trajet-form" class="space-y-5">
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">📍</span> Type de trajet</h2>
+       <div class="grid grid-cols-2 gap-3">
+        <label class="cursor-pointer"> <input type="radio" name="type_trajet" value="aller" class="sr-only peer" required>
+         <div class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-slate-100 border-2 border-slate-200 rounded-xl py-4 text-center font-bold transition-all">
+          🏠 → ✈️<br><span class="text-xs font-normal">ALLER</span>
+         </div></label> <label class="cursor-pointer"> <input type="radio" name="type_trajet" value="retour" class="sr-only peer">
+         <div class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-slate-100 border-2 border-slate-200 rounded-xl py-4 text-center font-bold transition-all">
+          ✈️ → 🏠<br><span class="text-xs font-normal">RETOUR</span>
+         </div></label>
+       </div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">📮</span> Adresse</h2><label for="adresse" class="block text-sm font-medium text-slate-700 mb-2" id="label-adresse">Adresse de départ *</label>
+       <div class="relative">
+        <input type="text" id="adresse" name="adresse" required placeholder="123 boul. Taschereau, Brossard..." class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus transition-colors" autocomplete="off">
+        <div id="loading-spinner" class="hidden absolute right-3 top-3">
+         <div class="animate-spin text-2xl">
+          ⏳
+         </div>
+        </div>
+       </div>
+       <p id="distance-info" class="text-xs text-slate-500 mt-2">Minimum 24h avant le vol</p>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">👥</span> Nombre de voyageurs</h2>
+       <div class="grid grid-cols-5 gap-2" id="voyageurs-grid-step1">
+        <!-- Généré par JS -->
+       </div>
+       <div id="voyageurs-count-step1" class="hidden">
+        1
+       </div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">🧳</span> Nombre de valises</h2>
+       <div class="grid grid-cols-6 gap-2" id="valises-grid-step1">
+        <!-- Généré par JS -->
+       </div>
+       <div id="valises-count-step1" class="hidden">
+        1
+       </div>
+      </div>
+      <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5">
+       <div class="text-xl font-bold text-blue-600 mb-1">
+        💰 Estimation
+       </div>
+       <div id="price-estimate" class="price-display">
+        -- $
+       </div>
+       <div id="price-breakdown" class="text-sm text-blue-700 mt-3 space-y-1"></div>
+      </div><button type="submit" id="step1-submit" class="btn-primary w-full py-5 rounded-2xl text-white font-bold text-xl flex items-center justify-center gap-3"> <span>Continuer</span> <span class="text-2xl">→</span> </button>
+     </form>
+    </div><!-- STEP 2: DÉTAILS -->
+    <div id="step2" class="max-w-lg mx-auto px-4 py-6 hidden">
+     <form id="details-form" class="space-y-5">
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">👥</span> Nombre de voyageurs</h2>
+       <div class="grid grid-cols-4 gap-2" id="voyageurs-grid">
+        <!-- Généré par JS -->
+       </div>
+       <div id="voyageurs-count" class="hidden">
+        1
+       </div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">🧳</span> Nombre de valises</h2>
+       <div class="grid grid-cols-6 gap-2" id="valises-grid">
+        <!-- Généré par JS -->
+       </div>
+       <div id="valises-count" class="hidden">
+        1
+       </div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4">📋 Informations client</h2>
+       <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+         <label for="prenom" class="block text-sm font-medium text-slate-700 mb-1">Prénom *</label> <input type="text" id="prenom" name="prenom" required placeholder="Marie" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+        </div>
+        <div>
+         <label for="nom" class="block text-sm font-medium text-slate-700 mb-1">Nom *</label> <input type="text" id="nom" name="nom" required placeholder="Tremblay" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+        </div>
+       </div>
+       <div class="mb-3">
+        <label for="telephone" class="block text-sm font-medium text-slate-700 mb-1">Téléphone *</label> <input type="tel" id="telephone" name="telephone" required placeholder="514-555-1234" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div>
+        <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Courriel *</label> <input type="email" id="email" name="email" required placeholder="marie@exemple.com" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 card-shadow">
+       <h2 class="font-bold text-slate-800 mb-4">✈️ Détails du vol</h2>
+       <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+         <label for="flight-date" class="block text-sm font-medium text-slate-700 mb-1">Date du vol *</label> <input type="date" id="flight-date" name="flight_date" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+        </div>
+        <div>
+         <label for="flight-time" class="block text-sm font-medium text-slate-700 mb-1">Heure du vol *</label> <input type="time" id="flight-time" name="flight_time" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+        </div>
+       </div>
+       <div class="grid grid-cols-2 gap-3">
+        <div class="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
+         <div class="text-sm text-blue-700 font-medium mb-2">
+          🚕 Prise en charge
+         </div>
+         <div id="pickup-time" class="text-2xl font-bold text-blue-600">
+          --:--
+         </div>
+         <div class="text-xs text-blue-600 mt-2">
+          4h avant décollage
+         </div>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-4 border-2 border-amber-200">
+         <div class="text-sm text-amber-700 font-medium mb-2">
+          ✈️ Enregistrement
+         </div>
+         <div id="checkin-time" class="text-2xl font-bold text-amber-600">
+          --:--
+         </div>
+         <div class="text-xs text-amber-600 mt-2">
+          2h avant décollage
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="flex gap-3">
+       <button type="button" id="back-step2" class="flex-1 py-4 rounded-xl border-2 border-slate-300 text-slate-700 font-semibold hover:bg-slate-100">← Modifier</button> <button type="submit" class="flex-1 py-4 rounded-xl btn-primary text-white font-bold">Continuer ✓</button>
+      </div>
+     </form>
+    </div><!-- STEP 3: RÉSUMÉ CLIENT -->
+    <div id="step3" class="max-w-lg mx-auto px-4 py-6 hidden">
+     <div class="bg-white rounded-2xl p-6 card-shadow slide-up">
+      <div class="text-center mb-6">
+       <div class="text-5xl mb-3">
+        ✈️
+       </div>
+       <h2 class="text-2xl font-bold text-slate-800">Résumé de votre réservation</h2>
+      </div>
+      <div id="summary-content" class="space-y-4 mb-6">
+       <!-- Généré par JS -->
+      </div><button id="confirm-reservation" class="btn-primary w-full py-5 rounded-2xl text-white font-bold text-xl"> 🚀 RÉSERVER MAINTENANT </button>
+     </div>
+    </div><!-- STEP 4: CONFIRMATION -->
+    <div id="step4" class="max-w-lg mx-auto px-4 py-6 hidden">
+     <div class="bg-white rounded-2xl p-6 card-shadow slide-up text-center">
+      <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+       <span class="text-5xl">✅</span>
+      </div>
+      <h2 class="text-2xl font-bold text-green-700 mb-2">Réservation confirmée !</h2>
+      <p class="text-slate-600 mb-6">Nous vous contacterons dans les prochaines heures.</p>
+      <div class="bg-blue-50 rounded-xl p-4 mb-6">
+       <p class="text-sm text-blue-800">📧 Confirmation envoyée à</p>
+       <p id="confirm-email" class="font-bold text-blue-600">email@exemple.com</p>
+      </div><button id="new-reservation" class="w-full py-4 rounded-xl border-2 border-blue-500 text-blue-600 font-semibold hover:bg-blue-50"> Nouvelle réservation </button>
+     </div>
+    </div>
+   </div><!-- ADMIN LOGIN PAGE -->
+   <div id="admin-login-page" class="page-slide min-h-full">
+    <header class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-12 px-4">
+     <div class="max-w-lg mx-auto text-center">
+      <div class="text-6xl mb-4">
+       ⚙️
+      </div>
+      <h1 class="text-3xl font-bold mb-2">Panel d'Administration</h1>
+      <p class="text-slate-300">Accédez à votre espace</p>
+     </div>
+    </header>
+    <div class="max-w-lg mx-auto px-4 py-8">
+     <div class="bg-white rounded-2xl p-6 card-shadow">
+      <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Connexion Admin</h2>
+      <form id="admin-login-form" class="space-y-4">
+       <div><label for="admin-email" class="block text-sm font-medium text-slate-700 mb-2">Adresse courriel</label> <input type="email" id="admin-email" required placeholder="admin@example.com" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div><label for="admin-password" class="block text-sm font-medium text-slate-700 mb-2">Mot de passe</label> <input type="password" id="admin-password" required placeholder="••••••••" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-lg input-focus">
+       </div>
+       <div id="admin-login-error" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-sm"></div><button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-bold text-lg">Accéder au panel</button>
+      </form>
+      <div class="mt-6 text-center"><button id="back-admin-login" type="button" class="text-slate-600 hover:text-slate-800 font-semibold">← Retour</button>
+      </div>
+     </div>
+    </div>
+   </div><!-- ADMIN PAGE -->
+   <div id="admin-page" class="page-slide min-h-full pb-6">
+    <header class="bg-slate-800 text-white py-4 px-4 sticky top-0 z-20">
+     <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+       <span class="text-2xl">⚙️</span>
+       <div>
+        <h1 class="text-xl font-bold">Administration</h1>
+        <p id="admin-name-display" class="text-xs text-slate-300">--</p>
+       </div>
+      </div>
+      <div class="flex items-center gap-2"><button id="admin-profile-btn" class="px-3 py-2 bg-slate-700 rounded-lg hover:bg-slate-600 text-sm">👤 Profil</button> <button id="admin-logout-btn" class="px-3 py-2 bg-red-700 rounded-lg hover:bg-red-600 text-sm">🚪 Déconnexion</button>
+      </div>
+     </div>
+    </header>
+    <div class="max-w-6xl mx-auto px-4 py-4">
+     <!-- STATS -->
+     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div class="bg-white rounded-xl p-4 card-shadow">
+       <div class="text-2xl mb-1">
+        📅
+       </div>
+       <div id="stat-total" class="text-2xl font-bold text-slate-800">
+        0
+       </div>
+       <div class="text-xs text-slate-500">
+        Total réservations
+       </div>
+      </div>
+      <div class="bg-white rounded-xl p-4 card-shadow">
+       <div class="text-2xl mb-1">
+        ⏳
+       </div>
+       <div id="stat-pending" class="text-2xl font-bold text-amber-600">
+        0
+       </div>
+       <div class="text-xs text-slate-500">
+        En attente
+       </div>
+      </div>
+      <div class="bg-white rounded-xl p-4 card-shadow">
+       <div class="text-2xl mb-1">
+        ✓
+       </div>
+       <div id="stat-confirmed" class="text-2xl font-bold text-green-600">
+        0
+       </div>
+       <div class="text-xs text-slate-500">
+        Confirmées
+       </div>
+      </div>
+      <div class="bg-white rounded-xl p-4 card-shadow">
+       <div class="text-2xl mb-1">
+        💰
+       </div>
+       <div id="stat-revenue" class="text-2xl font-bold text-blue-600">
+        0$
+       </div>
+       <div class="text-xs text-slate-500">
+        Chiffre d'affaires
+       </div>
+      </div>
+     </div><!-- RÉSERVATIONS À VENIR -->
+     <div class="bg-white rounded-xl p-4 card-shadow mb-6">
+      <h2 class="font-bold text-lg text-slate-800 mb-4">🔄 À RÉSERVER UBER - Prochaines 24h</h2>
+      <div id="uber-alerts" class="space-y-3">
+       <div class="text-slate-500 text-center py-6">
+        <div class="text-4xl mb-2">
+         📭
+        </div> Aucune réservation urgente
+       </div>
+      </div>
+     </div><!-- CONFIGURATION TARIFAIRE -->
+     <div class="bg-white rounded-xl p-4 card-shadow mb-6">
+      <h2 class="font-bold text-lg text-slate-800 mb-4">⚙️ Configuration tarifaire</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Prix ALLER Standard</label> <input type="number" id="config-aller-std" value="165" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">≤ 40 km</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Prix RETOUR Standard</label> <input type="number" id="config-retour-std" value="135" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">≤ 40 km</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Distance Max Standard</label> <input type="number" id="config-dist-std" value="40" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">km</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Prix ALLER Étendu</label> <input type="number" id="config-aller-ext" value="185" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">41-60 km</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Prix RETOUR Étendu</label> <input type="number" id="config-retour-ext" value="155" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">41-60 km</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Distance Max Total</label> <input type="number" id="config-dist-max" value="60" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">km</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Supplément UBER XL</label> <input type="number" id="config-uber-xl" value="15" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">$</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Prix Valise Supp.</label> <input type="number" id="config-valise-supp" value="20" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">$ / unité</span>
+       </div>
+       <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Max Personnes</label> <input type="number" id="config-max-pers" value="4" class="w-full px-3 py-2 border rounded-lg text-sm"> <span class="text-xs text-slate-500">personnes</span>
+       </div>
+      </div><button id="save-config" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"> 💾 Enregistrer </button>
+     </div><!-- TABLEAU RÉSERVATIONS -->
+     <div class="bg-white rounded-xl card-shadow overflow-hidden">
+      <div class="overflow-x-auto">
+       <table class="w-full">
+        <thead class="bg-slate-50 border-b">
+         <tr>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">#</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Client</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Trajet</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Détails</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Vol</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Prix</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Commande Uber</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Statut</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-slate-600 uppercase">Actions</th>
+         </tr>
+        </thead>
+        <tbody id="reservations-table">
+         <tr>
+          <td colspan="7" class="py-12 text-center text-slate-500">
+           <div class="text-4xl mb-2">
+            📭
+           </div> Aucune réservation</td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </div>
+   </div><!-- FLOATING BUTTONS --> <a id="whatsapp-btn" href="https://wa.me/15145551234" target="_blank" rel="noopener noreferrer" class="whatsapp-btn fixed bottom-4 right-4 w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl z-30 shadow-lg">💬</a> <button id="admin-trigger" class="fixed bottom-4 left-4 w-10 h-10 rounded-full bg-slate-200 text-slate-600 opacity-30 hover:opacity-100 transition-opacity z-30">⚙️</button> <!-- TOAST CONTAINER -->
+   <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+  </div><!-- MODAL DÉTAILS RÉSERVATION -->
+  <div id="reservation-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+   <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col card-shadow">
+    <div class="sticky top-0 bg-slate-50 border-b p-4 flex items-center justify-between">
+     <h2 class="text-xl font-bold text-slate-800">📋 Détails de la réservation</h2><button onclick="closeReservationModal()" class="text-2xl text-slate-400 hover:text-slate-600">✕</button>
+    </div>
+    <div id="modal-content" class="flex-1 overflow-y-auto p-6 space-y-6">
+     <!-- Généré par JS -->
+    </div>
+   </div>
+  </div><!-- MODAL PROFIL ADMIN -->
+  <div id="admin-profile-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+   <div class="bg-white rounded-2xl max-w-md w-full card-shadow">
+    <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white py-8 px-6 text-center">
+     <div id="admin-avatar" class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-3">
+      A
+     </div>
+     <h2 id="admin-profile-name" class="text-xl font-bold">--</h2>
+     <p id="admin-profile-email" class="text-slate-300 text-sm">--</p>
+    </div>
+    <div class="p-6 space-y-4">
+     <div class="bg-slate-50 rounded-lg p-4"><label class="block text-xs font-semibold text-slate-600 mb-2">Prénom</label> <input type="text" id="admin-edit-prenom" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Prénom">
+     </div>
+     <div class="bg-slate-50 rounded-lg p-4"><label class="block text-xs font-semibold text-slate-600 mb-2">Nom</label> <input type="text" id="admin-edit-nom" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="Nom">
+     </div>
+     <div class="bg-slate-50 rounded-lg p-4"><label class="block text-xs font-semibold text-slate-600 mb-2">Téléphone</label> <input type="tel" id="admin-edit-phone" class="w-full px-3 py-2 border rounded-lg text-sm" placeholder="+1 514 555-1234">
+     </div>
+     <div class="bg-blue-50 rounded-lg p-4"><label class="block text-xs font-semibold text-blue-700 mb-2">Email (non modifiable)</label>
+      <p id="admin-display-email" class="text-sm text-blue-700 font-medium">--</p>
+     </div>
+     <div class="flex gap-2"><button onclick="saveAdminProfile()" class="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold text-sm">💾 Enregistrer</button> <button onclick="closeAdminProfileModal()" class="flex-1 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg font-semibold text-sm">Fermer</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      prix_aller_standard: 165,
+      prix_retour_standard: 135,
+      max_distance_standard: 40,
+      prix_aller_etendu: 185,
+      prix_retour_etendu: 155,
+      max_distance_total: 60,
+      prix_uber_xl: 15,
+      prix_valise_supp: 20,
+      max_personnes: 4,
+      max_valises: 6,
+      whatsapp_number: '+1 514 555-1234'
+    };
+
+    let config = { ...defaultConfig };
+    let allReservations = [];
+    let currentStep = 1;
+    let formData = {};
+    let isLoading = false;
+    let autocompleteInstance = null;
+    let calculatedDistance = 0;
+    let calculatedPrice = 0;
+    let currentUser = null;
+    let adminUser = null;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const adminMode = urlParams.get('admin') === 'true';
+
+    function setActivePage(pageId) {
+      // Masquer toutes les pages
+      document.getElementById('auth-page').classList.remove('page-active');
+      document.getElementById('auth-page').classList.add('page-hidden');
+      document.getElementById('login-page').classList.remove('page-active');
+      document.getElementById('admin-login-page').classList.remove('page-active');
+      document.getElementById('user-dashboard').classList.remove('page-active');
+      document.getElementById('client-page').classList.remove('page-active');
+      document.getElementById('admin-page').classList.remove('page-active');
+
+      // Afficher la page demandée
+      if (pageId === 'auth') {
+        document.getElementById('auth-page').classList.remove('page-hidden');
+        document.getElementById('auth-page').classList.add('page-active');
+      } else if (pageId === 'login') {
+        document.getElementById('auth-page').classList.add('page-hidden');
+        document.getElementById('login-page').classList.add('page-active');
+      } else if (pageId === 'admin-login') {
+        document.getElementById('auth-page').classList.add('page-hidden');
+        document.getElementById('admin-login-page').classList.add('page-active');
+      } else if (pageId === 'dashboard') {
+        document.getElementById('auth-page').classList.add('page-hidden');
+        document.getElementById('user-dashboard').classList.add('page-active');
+      } else if (pageId === 'client') {
+        document.getElementById('auth-page').classList.add('page-hidden');
+        document.getElementById('client-page').classList.add('page-active');
+      } else if (pageId === 'admin') {
+        document.getElementById('auth-page').classList.add('page-hidden');
+        document.getElementById('client-page').classList.remove('page-active');
+        document.getElementById('admin-page').classList.add('page-active');
+      }
+    }
+
+    function updateProfileWidget() {
+      const connected = document.getElementById('profile-connected');
+      const guest = document.getElementById('profile-guest');
+
+      if (currentUser) {
+        connected.classList.remove('hidden');
+        guest.classList.add('hidden');
+
+        const initials = (currentUser.prenom?.[0] || 'U') + (currentUser.nom?.[0] || '');
+        document.getElementById('profile-avatar').textContent = initials.toUpperCase();
+        document.getElementById('profile-name').textContent = `${currentUser.prenom} ${currentUser.nom}`;
+        document.getElementById('profile-phone').textContent = currentUser.telephone || '--';
+      } else {
+        connected.classList.add('hidden');
+        guest.classList.remove('hidden');
+      }
+    }
+
+    function closeProfileMenu() {
+      document.getElementById('profile-menu').classList.add('hidden');
+    }
+
+    function goToUserReservations() {
+      if (!currentUser) return;
+      setActivePage('dashboard');
+      updateUserDashboard();
+      closeProfileMenu();
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = { ...defaultConfig, ...newConfig };
+          applyConfig();
+        },
+        mapToCapabilities: (cfg) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (cfg) => new Map([
+          ['prix_aller_standard', String(cfg.prix_aller_standard || defaultConfig.prix_aller_standard)],
+          ['prix_retour_standard', String(cfg.prix_retour_standard || defaultConfig.prix_retour_standard)],
+          ['max_distance_standard', String(cfg.max_distance_standard || defaultConfig.max_distance_standard)],
+          ['prix_aller_etendu', String(cfg.prix_aller_etendu || defaultConfig.prix_aller_etendu)],
+          ['prix_retour_etendu', String(cfg.prix_retour_etendu || defaultConfig.prix_retour_etendu)],
+          ['max_distance_total', String(cfg.max_distance_total || defaultConfig.max_distance_total)],
+          ['prix_uber_xl', String(cfg.prix_uber_xl || defaultConfig.prix_uber_xl)],
+          ['prix_valise_supp', String(cfg.prix_valise_supp || defaultConfig.prix_valise_supp)],
+          ['max_personnes', String(cfg.max_personnes || defaultConfig.max_personnes)],
+          ['whatsapp_number', cfg.whatsapp_number || defaultConfig.whatsapp_number]
+        ])
+      });
+    }
+
+    function applyConfig() {
+      document.getElementById('config-aller-std').value = config.prix_aller_standard;
+      document.getElementById('config-retour-std').value = config.prix_retour_standard;
+      document.getElementById('config-dist-std').value = config.max_distance_standard;
+      document.getElementById('config-aller-ext').value = config.prix_aller_etendu;
+      document.getElementById('config-retour-ext').value = config.prix_retour_etendu;
+      document.getElementById('config-dist-max').value = config.max_distance_total;
+      document.getElementById('config-uber-xl').value = config.prix_uber_xl;
+      document.getElementById('config-valise-supp').value = config.prix_valise_supp;
+      document.getElementById('config-max-pers').value = config.max_personnes;
+
+      const whatsappBtn = document.getElementById('whatsapp-btn');
+      const cleanNumber = (config.whatsapp_number || defaultConfig.whatsapp_number).replace(/[^0-9+]/g, '');
+      whatsappBtn.href = `https://wa.me/${cleanNumber.replace('+', '')}`;
+    }
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allReservations = data || [];
+        updateAdminUI();
+        saveToLocalStorage();
+      }
+    };
+
+    async function initDataSDK() {
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) console.error('Data SDK init failed');
+      }
+    }
+
+    function calculatePrice() {
+      const typeTrajet = document.querySelector('input[name="type_trajet"]:checked')?.value;
+      const voyageurs = parseInt(document.getElementById('voyageurs-count-step1')?.textContent || 1);
+      const valises = parseInt(document.getElementById('valises-count-step1')?.textContent || 1);
+
+      if (!typeTrajet || calculatedDistance === 0) {
+        document.getElementById('price-estimate').textContent = '-- $';
+        document.getElementById('price-breakdown').innerHTML = '';
+        return;
+      }
+
+      let prixBase = 0;
+      const distStd = config.max_distance_standard;
+      const distMax = config.max_distance_total;
+
+      if (typeTrajet === 'aller') {
+        prixBase = calculatedDistance <= distStd ? config.prix_aller_standard : config.prix_aller_etendu;
+      } else {
+        prixBase = calculatedDistance <= distStd ? config.prix_retour_standard : config.prix_retour_etendu;
+      }
+
+      let prixTotal = prixBase;
+      let breakdown = [];
+
+      breakdown.push(`Base (${calculatedDistance}km): ${prixBase}$`);
+
+      if (valises > 4) {
+        const prixValises = (valises - 4) * config.prix_valise_supp;
+        prixTotal += prixValises;
+        breakdown.push(`Valises supp. (${valises - 4}×): +${prixValises}$`);
+      }
+
+      if (voyageurs >= 5 || valises >= 5) {
+        prixTotal += config.prix_uber_xl;
+        breakdown.push(`Supplément transport: +${config.prix_uber_xl}$`);
+      }
+
+      calculatedPrice = prixTotal;
+
+      document.getElementById('price-estimate').textContent = `${prixTotal}$`;
+      const breakdownDiv = document.getElementById('price-breakdown');
+      breakdownDiv.innerHTML = breakdown.map(b => `<div>• ${b}</div>`).join('');
+
+      return prixTotal;
+    }
+
+    function calculateDistanceFromAddresses() {
+      const address = document.getElementById('adresse')?.value || '';
+      const distanceInfo = document.getElementById('distance-info');
+      
+      const distanceDB = {
+        'brossard': 28, 'brossard qc': 28,
+        'longueuil': 18, 'longueuil qc': 18,
+        'laval': 25, 'laval qc': 25,
+        'plateau': 12, 'plateau mont-royal': 12,
+        'outremont': 15, 'mont-royal': 16,
+        'westmount': 14, 'hampstead': 17,
+        'côte-st-luc': 18, 'côte saint-luc': 18,
+        'beaconsfield': 35, 'baie-d\'urfé': 38,
+        'dorval': 20, 'pointe-claire': 28,
+        'kirkland': 32, 'saint-laurent': 22,
+        'villeray': 16, 'rosemont': 18,
+        'st-laurent': 22, 'saint-léonard': 20,
+        'anjou': 22, 'montréal-nord': 24,
+        'ahuntsic': 20, 'cartierville': 21,
+        'lachine': 25, 'lasalle': 26,
+        'verdun': 24, 'lhw': 22,
+        'notre-dame-de-grâce': 19, 'ndg': 19,
+        'centre-ville': 11, 'downtown': 11,
+        'griffintown': 12, 'old montreal': 13,
+        'ste-catherine': 11, 'sainte-catherine': 11,
+        'mascouche': 45, 'terrebonne': 40,
+        'repentigny': 42, 'l\'assomption': 50,
+        'gatineau': 65, 'hull': 65,
+        'trois-rivières': 140,
+        'quebec': 250, 'sherbrooke': 150
+      };
+
+      const addressLower = address.toLowerCase().trim();
+      
+      let found = false;
+      for (const [key, distance] of Object.entries(distanceDB)) {
+        if (addressLower.includes(key)) {
+          calculatedDistance = distance;
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        calculatedDistance = 30;
+      }
+
+      distanceInfo.innerHTML = `✅ Distance estimée: <strong>${calculatedDistance}km</strong>`;
+
+      if (calculatedDistance > config.max_distance_total) {
+        distanceInfo.innerHTML = `❌ <strong>${calculatedDistance}km - HORS ZONE</strong> (max ${config.max_distance_total}km)`;
+        document.getElementById('price-estimate').textContent = 'Hors zone';
+      } else {
+        calculatePrice();
+      }
+    }
+
+    function initGrids() {
+      const maxPersonnes = 5;
+      const maxValises = 6;
+
+      const voyageursGrid1 = document.getElementById('voyageurs-grid-step1');
+      voyageursGrid1.innerHTML = Array.from({ length: maxPersonnes }, (_, i) => `
+        <label class="cursor-pointer">
+          <input type="radio" name="nb_voyageurs_step1" value="${i + 1}" class="sr-only peer" required>
+          <div class="peer-checked:bg-blue-600 peer-checked:text-white bg-slate-100 border-2 border-slate-200 rounded-lg py-3 text-center font-bold transition-all">
+            ${i + 1}
+          </div>
+        </label>
+      `).join('');
+
+      const valisesGrid1 = document.getElementById('valises-grid-step1');
+      valisesGrid1.innerHTML = Array.from({ length: maxValises }, (_, i) => `
+        <label class="cursor-pointer">
+          <input type="radio" name="nb_valises_step1" value="${i + 1}" class="sr-only peer" required>
+          <div class="peer-checked:bg-blue-600 peer-checked:text-white bg-slate-100 border-2 border-slate-200 rounded-lg py-3 text-center font-bold text-sm transition-all">
+            ${i + 1}
+          </div>
+        </label>
+      `).join('');
+
+      const voyageursGrid2 = document.getElementById('voyageurs-grid');
+      voyageursGrid2.innerHTML = Array.from({ length: 4 }, (_, i) => `
+        <label class="cursor-pointer">
+          <input type="radio" name="nb_voyageurs" value="${i + 1}" class="sr-only peer" required>
+          <div class="peer-checked:bg-blue-600 peer-checked:text-white bg-slate-100 border-2 border-slate-200 rounded-lg py-3 text-center font-bold transition-all">
+            ${i + 1}
+          </div>
+        </label>
+      `).join('');
+
+      const valisesGrid2 = document.getElementById('valises-grid');
+      valisesGrid2.innerHTML = Array.from({ length: maxValises }, (_, i) => `
+        <label class="cursor-pointer">
+          <input type="radio" name="nb_valises" value="${i + 1}" class="sr-only peer" required>
+          <div class="peer-checked:bg-blue-600 peer-checked:text-white bg-slate-100 border-2 border-slate-200 rounded-lg py-3 text-center font-bold text-sm transition-all">
+            ${i + 1}
+          </div>
+        </label>
+      `).join('');
+
+      document.querySelectorAll('input[name="nb_voyageurs_step1"], input[name="nb_valises_step1"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const v = document.querySelector('input[name="nb_voyageurs_step1"]:checked')?.value;
+          const val = document.querySelector('input[name="nb_valises_step1"]:checked')?.value;
+          if (v) document.getElementById('voyageurs-count-step1').textContent = v;
+          if (val) document.getElementById('valises-count-step1').textContent = val;
+          calculatePrice();
+        });
+      });
+
+      document.querySelectorAll('input[name="nb_voyageurs"], input[name="nb_valises"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          const v = document.querySelector('input[name="nb_voyageurs"]:checked')?.value;
+          const val = document.querySelector('input[name="nb_valises"]:checked')?.value;
+          if (v) document.getElementById('voyageurs-count').textContent = v;
+          if (val) document.getElementById('valises-count').textContent = val;
+        });
+      });
+    }
+
+    function goToStep(step) {
+      currentStep = step;
+      document.querySelectorAll('[id^="step"]').forEach(el => {
+        if (el.id.match(/^step\d$/)) el.classList.add('hidden');
+      });
+      document.getElementById(`step${step}`).classList.remove('hidden');
+
+      for (let i = 1; i <= 4; i++) {
+        const ind = document.getElementById(`step${i}-indicator`);
+        if (!ind) continue;
+        ind.classList.remove('step-active', 'step-completed', 'bg-slate-200', 'text-slate-500');
+        if (i < step) ind.classList.add('step-completed');
+        else if (i === step) ind.classList.add('step-active');
+        else ind.classList.add('bg-slate-200', 'text-slate-500');
+      }
+
+      document.getElementById('progress-bar-1').style.background = step > 1 ? '#22c55e' : '#e2e8f0';
+      document.getElementById('progress-bar-2').style.background = step > 2 ? '#22c55e' : '#e2e8f0';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600' };
+      
+      toast.className = `toast ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg max-w-xs`;
+      toast.textContent = msg;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function updateAdminUI() {
+      document.getElementById('stat-total').textContent = allReservations.length;
+      document.getElementById('stat-pending').textContent = allReservations.filter(r => r.status === 'pending').length;
+      document.getElementById('stat-confirmed').textContent = allReservations.filter(r => r.status === 'confirmed' || r.status === 'completed').length;
+
+      const revenue = allReservations.filter(r => r.status !== 'pending').reduce((sum, r) => sum + (r.prix_total || 0), 0);
+      document.getElementById('stat-revenue').textContent = `${revenue}$`;
+
+      const tbody = document.getElementById('reservations-table');
+      if (allReservations.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-500"><div class="text-4xl mb-2">📭</div>Aucune réservation</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = allReservations.map((r, idx) => `
+        <tr class="border-b hover:bg-slate-50">
+          <td class="py-3 px-4 text-sm font-bold text-slate-800">#${(idx + 1).toString().padStart(3, '0')}</td>
+          <td class="py-3 px-4">
+            <div class="font-semibold text-slate-800">${r.prenom} ${r.nom}</div>
+            <div class="text-sm text-slate-500">${r.telephone}</div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-medium">${r.type_trajet === 'aller' ? '🏠 → ✈️' : '✈️ → 🏠'}</div>
+            <div class="text-xs text-slate-500">${r.distance_km}km</div>
+          </td>
+          <td class="py-3 px-4 text-sm">
+            <div>${r.nb_voyageurs} pers. | ${r.nb_valises} valises</div>
+          </td>
+          <td class="py-3 px-4">
+            <div class="font-semibold text-slate-800">${r.flight_date || '--'}</div>
+            <div class="text-sm text-slate-600">Décollage: ${r.flight_time || '--'}</div>
+          </td>
+          <td class="py-3 px-4 font-bold text-green-600">${r.prix_total}$</td>
+          <td class="py-3 px-4 text-sm">-</td>
+          <td class="py-3 px-4">
+            <span class="status-${r.status} px-3 py-1 rounded-full text-xs font-semibold">
+              ${r.status === 'pending' ? '⏳ En attente' : r.status === 'confirmed' ? '✓ Confirmée' : '✓✓ Complétée'}
+            </span>
+          </td>
+          <td class="py-3 px-4">
+            <button onclick="viewReservationDetails('${r.__backendId}')" class="text-blue-600 hover:underline text-sm">Voir</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateUserDashboard() {
+      if (!currentUser) return;
+      
+      document.getElementById('user-email-display').textContent = currentUser.email || '--';
+      
+      const userReservations = allReservations.filter(r => r.email === currentUser.email);
+      const container = document.getElementById('user-reservations-list');
+      
+      if (userReservations.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-slate-500"><div class="text-4xl mb-2">📭</div>Aucune réservation pour le moment</div>`;
+        return;
+      }
+
+      container.innerHTML = userReservations.map(r => `
+        <div class="bg-slate-50 rounded-xl p-4 border-l-4 border-green-600">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <div class="font-bold text-slate-800">${r.type_trajet === 'aller' ? '🏠 → ✈️ ALLER' : '✈️ → 🏠 RETOUR'}</div>
+              <div class="text-sm text-slate-600">${r.flight_date} à ${r.flight_time}</div>
+            </div>
+            <span class="status-${r.status} px-3 py-1 rounded-full text-xs font-semibold">
+              ${r.status === 'pending' ? '⏳' : '✓'}
+            </span>
+          </div>
+          <div class="text-lg font-bold text-green-600">${r.prix_total}$</div>
+        </div>
+      `).join('');
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('yulTransportSession', JSON.stringify({
+        currentUser,
+        lastSync: new Date().toISOString()
+      }));
+    }
+
+    function loadFromLocalStorage() {
+      const saved = localStorage.getItem('yulTransportSession');
+      if (saved) {
+        const data = JSON.parse(saved);
+        currentUser = data.currentUser;
+        if (currentUser) {
+          updateProfileWidget();
+        }
+      }
+    }
+
+    // EVENT LISTENERS
+    document.getElementById('client-login-btn').addEventListener('click', () => setActivePage('login'));
+    document.getElementById('new-booking-home-btn').addEventListener('click', () => setActivePage('client'));
+    document.getElementById('back-to-home-auth').addEventListener('click', () => setActivePage('auth'));
+    document.getElementById('switch-to-signup').addEventListener('click', () => {
+      document.getElementById('login-form-container').classList.add('hidden');
+      document.getElementById('signup-form-container').classList.remove('hidden');
+    });
+    document.getElementById('switch-to-login').addEventListener('click', () => {
+      document.getElementById('signup-form-container').classList.add('hidden');
+      document.getElementById('login-form-container').classList.remove('hidden');
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      currentUser = { email, prenom: 'User', nom: 'Client' };
+      updateProfileWidget();
+      setActivePage('dashboard');
+      updateUserDashboard();
+    });
+
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-password-confirm').value;
+      
+      if (password !== confirm) {
+        showToast('Les mots de passe ne correspondent pas', 'error');
+        return;
+      }
+      
+      currentUser = { email, prenom: 'New', nom: 'User' };
+      updateProfileWidget();
+      setActivePage('dashboard');
+      updateUserDashboard();
+    });
+
+    // ADMIN LOGIN
+    document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('admin-email').value;
+      const password = document.getElementById('admin-password').value;
+
+      if (email && password) {
+        adminUser = { 
+          email, 
+          prenom: 'Admin', 
+          nom: 'Manager',
+          telephone: '+1 514 123-4567'
+        };
+        updateAdminHeader();
+        setActivePage('admin');
+        showToast('Connexion admin réussie', 'success');
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      currentUser = null;
+      updateProfileWidget();
+      setActivePage('auth');
+    });
+
+    document.getElementById('logout-client-btn').addEventListener('click', () => {
+      currentUser = null;
+      updateProfileWidget();
+      setActivePage('auth');
+      closeProfileMenu();
+    });
+
+    document.getElementById('admin-logout-btn').addEventListener('click', () => {
+      adminUser = null;
+      setActivePage('auth');
+      showToast('Déconnecté', 'info');
+    });
+
+    document.getElementById('back-admin-login').addEventListener('click', () => setActivePage('auth'));
+    document.getElementById('admin-trigger').addEventListener('click', () => setActivePage('admin-login'));
+    document.getElementById('admin-profile-btn').addEventListener('click', () => showAdminProfile());
+
+    document.getElementById('adresse').addEventListener('change', calculateDistanceFromAddresses);
+    
+    document.getElementById('flight-time').addEventListener('change', () => {
+      const flightTime = document.getElementById('flight-time').value;
+      if (flightTime) {
+        const [hours, minutes] = flightTime.split(':').map(Number);
+        
+        // Prise en charge: 4h avant décollage
+        let pickupHours = hours - 4;
+        let pickupMinutes = minutes;
+        if (pickupHours < 0) pickupHours += 24;
+        
+        // Enregistrement: 2h avant décollage
+        let checkinHours = hours - 2;
+        let checkinMinutes = minutes;
+        if (checkinHours < 0) checkinHours += 24;
+        
+        const formatTime = (h, m) => `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        
+        document.getElementById('pickup-time').textContent = formatTime(pickupHours, pickupMinutes);
+        document.getElementById('checkin-time').textContent = formatTime(checkinHours, checkinMinutes);
+      }
+    });
+    
+    document.getElementById('trajet-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Transférer voyageurs et valises de Step 1 à Step 2
+      const voyageurs1 = document.querySelector('input[name="nb_voyageurs_step1"]:checked')?.value;
+      const valises1 = document.querySelector('input[name="nb_valises_step1"]:checked')?.value;
+      
+      if (voyageurs1) {
+        const voyageurs2Radio = document.querySelector(`input[name="nb_voyageurs"][value="${voyageurs1}"]`);
+        if (voyageurs2Radio) voyageurs2Radio.checked = true;
+        document.getElementById('voyageurs-count').textContent = voyageurs1;
+      }
+      
+      if (valises1) {
+        const valises2Radio = document.querySelector(`input[name="nb_valises"][value="${valises1}"]`);
+        if (valises2Radio) valises2Radio.checked = true;
+        document.getElementById('valises-count').textContent = valises1;
+      }
+      
+      goToStep(2);
+    });
+
+    document.getElementById('back-step2').addEventListener('click', () => goToStep(1));
+    document.getElementById('details-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      goToStep(3);
+    });
+
+    document.getElementById('login-from-client-btn').addEventListener('click', () => setActivePage('login'));
+    document.getElementById('profile-menu-toggle').addEventListener('click', () => {
+      document.getElementById('profile-menu').classList.toggle('hidden');
+    });
+
+    document.getElementById('new-booking-btn').addEventListener('click', () => setActivePage('client'));
+    document.getElementById('view-profile-btn').addEventListener('click', () => setActivePage('dashboard'));
+    document.getElementById('view-profile-client-btn').addEventListener('click', () => {
+      closeProfileMenu();
+      setActivePage('dashboard');
+    });
+
+    // Remplir le résumé avant d'afficher step 3
+    document.getElementById('details-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const adresse = document.getElementById('adresse').value;
+      const typeTrajet = document.querySelector('input[name="type_trajet"]:checked').value;
+      const prenom = document.getElementById('prenom').value;
+      const nom = document.getElementById('nom').value;
+      const telephone = document.getElementById('telephone').value;
+      const email = document.getElementById('email').value;
+      const voyageurs = parseInt(document.querySelector('input[name="nb_voyageurs"]:checked')?.value || 1);
+      const valises = parseInt(document.querySelector('input[name="nb_valises"]:checked')?.value || 1);
+      const flightDate = document.getElementById('flight-date').value;
+      const flightTime = document.getElementById('flight-time').value;
+      const pickupTime = document.getElementById('pickup-time').textContent;
+      const checkinTime = document.getElementById('checkin-time').textContent;
+
+      const trajetLabel = typeTrajet === 'aller' ? '🏠 Domicile → ✈️ YUL' : '✈️ YUL → 🏠 Domicile';
+      const needsSupport = voyageurs >= 4 || valises >= 4;
+      
+      const summary = `
+        <div class="space-y-5">
+          <div class="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-600">
+            <div class="text-sm font-semibold text-blue-700 mb-3">Trajet</div>
+            <div class="text-lg font-bold text-slate-800 mb-2">${trajetLabel}</div>
+            <div class="text-slate-600 text-sm mb-2">${adresse}</div>
+            <div class="text-sm text-green-600 font-medium">✅ Distance: ${calculatedDistance}km</div>
+          </div>
+
+          <div class="bg-amber-50 rounded-xl p-4 border-l-4 border-amber-600">
+            <div class="text-sm font-semibold text-amber-700 mb-3">Vol</div>
+            <div class="text-slate-800 mb-2">
+              <div class="font-bold">✈️ ${flightDate}</div>
+              <div class="text-sm text-slate-600">Décollage: ${flightTime}</div>
+            </div>
+            <div class="text-sm text-slate-700 mt-3 space-y-1">
+              <div>🚕 Prise en charge: ${pickupTime}</div>
+              <div>✈️ Enregistrement: ${checkinTime}</div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 rounded-xl p-4 border-l-4 border-slate-400">
+            <div class="text-sm font-semibold text-slate-700 mb-3">Client</div>
+            <div class="text-slate-800 font-medium">${prenom} ${nom}</div>
+            <div class="text-sm text-slate-600 mt-1">${telephone}</div>
+            <div class="text-sm text-slate-600">${email}</div>
+          </div>
+
+          <div class="bg-purple-50 rounded-xl p-4 border-l-4 border-purple-600">
+            <div class="text-sm font-semibold text-purple-700 mb-3">Détails du voyage</div>
+            <div class="text-lg font-bold text-slate-800 mb-3">👥 ${voyageurs} personne(s) | 🧳 ${valises} valise(s)</div>
+            ${needsSupport ? '<div class="bg-orange-100 border border-orange-300 rounded-lg p-3 text-sm text-orange-700 font-semibold">🚗 Supplément transport requis</div>' : ''}
+          </div>
+
+          <div class="bg-green-50 rounded-xl p-4 border-l-4 border-green-600">
+            <div class="text-sm font-semibold text-green-700 mb-2">Prix total</div>
+            <div class="text-3xl font-bold text-green-600">${calculatedPrice}$</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('summary-content').innerHTML = summary;
+      goToStep(3);
+    });
+
+    document.getElementById('confirm-reservation').addEventListener('click', async () => {
+      const typeTrajet = document.querySelector('input[name="type_trajet"]:checked').value;
+      const prenom = document.getElementById('prenom').value;
+      const nom = document.getElementById('nom').value;
+      const telephone = document.getElementById('telephone').value;
+      const email = document.getElementById('email').value;
+      const voyageurs = parseInt(document.getElementById('voyageurs-count').textContent);
+      const valises = parseInt(document.getElementById('valises-count').textContent);
+      const flightDate = document.getElementById('flight-date').value;
+      const flightTime = document.getElementById('flight-time').value;
+
+      const reservation = {
+        type_trajet: typeTrajet,
+        prenom,
+        nom,
+        telephone,
+        email,
+        nb_voyageurs: voyageurs,
+        nb_valises: valises,
+        distance_km: calculatedDistance,
+        prix_total: calculatedPrice,
+        flight_date: flightDate,
+        flight_time: flightTime,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      if (window.dataSdk) {
+        const result = await window.dataSdk.create(reservation);
+        if (result.isOk) {
+          document.getElementById('confirm-email').textContent = email;
+          goToStep(4);
+        } else {
+          showToast('Erreur lors de la réservation', 'error');
+        }
+      }
+    });
+
+    document.getElementById('new-reservation').addEventListener('click', () => {
+      document.getElementById('trajet-form').reset();
+      goToStep(1);
+      initGrids();
+      calculateDistanceFromAddresses();
+    });
+
+    document.getElementById('save-config').addEventListener('click', async () => {
+      config.prix_aller_standard = parseFloat(document.getElementById('config-aller-std').value);
+      config.prix_retour_standard = parseFloat(document.getElementById('config-retour-std').value);
+      config.max_distance_standard = parseFloat(document.getElementById('config-dist-std').value);
+      config.prix_aller_etendu = parseFloat(document.getElementById('config-aller-ext').value);
+      config.prix_retour_etendu = parseFloat(document.getElementById('config-retour-ext').value);
+      config.max_distance_total = parseFloat(document.getElementById('config-dist-max').value);
+      config.prix_uber_xl = parseFloat(document.getElementById('config-uber-xl').value);
+      config.prix_valise_supp = parseFloat(document.getElementById('config-valise-supp').value);
+      config.max_personnes = parseFloat(document.getElementById('config-max-pers').value);
+
+      if (window.elementSdk) {
+        await window.elementSdk.setConfig(config);
+      }
+      showToast('Configuration enregistrée', 'success');
+    });
+
+    function viewReservationDetails(reservationId) {
+      const reservation = allReservations.find(r => r.__backendId === reservationId);
+      if (!reservation) return;
+
+      const modalContent = document.getElementById('modal-content');
+      modalContent.innerHTML = `
+        <div class="space-y-4">
+          <div class="border-b pb-4">
+            <h3 class="font-bold text-slate-800 mb-2">Informations client</h3>
+            <p class="text-slate-600">${reservation.prenom} ${reservation.nom}</p>
+            <p class="text-slate-600">${reservation.email}</p>
+            <p class="text-slate-600">${reservation.telephone}</p>
+          </div>
+          <div class="border-b pb-4">
+            <h3 class="font-bold text-slate-800 mb-2">Détails de la réservation</h3>
+            <p class="text-slate-600">Trajet: ${reservation.type_trajet === 'aller' ? 'Aller' : 'Retour'}</p>
+            <p class="text-slate-600">Distance: ${reservation.distance_km}km</p>
+            <p class="text-slate-600">Voyageurs: ${reservation.nb_voyageurs} | Valises: ${reservation.nb_valises}</p>
+            <p class="text-slate-600">Vol: ${reservation.flight_date} à ${reservation.flight_time}</p>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-800 mb-2">Prix</h3>
+            <p class="text-2xl font-bold text-green-600">${reservation.prix_total}$</p>
+          </div>
+        </div>
+      `;
+      document.getElementById('reservation-modal').classList.remove('hidden');
+    }
+
+    function closeReservationModal() {
+      document.getElementById('reservation-modal').classList.add('hidden');
+    }
+
+    function updateAdminHeader() {
+      if (adminUser) {
+        const initials = (adminUser.prenom?.[0] || 'A') + (adminUser.nom?.[0] || '');
+        document.getElementById('admin-name-display').textContent = `${adminUser.prenom} ${adminUser.nom}`;
+      }
+    }
+
+    function showAdminProfile() {
+      if (!adminUser) return;
+      
+      const initials = (adminUser.prenom?.[0] || 'A') + (adminUser.nom?.[0] || '');
+      document.getElementById('admin-avatar').textContent = initials.toUpperCase();
+      document.getElementById('admin-profile-name').textContent = `${adminUser.prenom} ${adminUser.nom}`;
+      document.getElementById('admin-profile-email').textContent = adminUser.email;
+      document.getElementById('admin-display-email').textContent = adminUser.email;
+      
+      document.getElementById('admin-edit-prenom').value = adminUser.prenom || '';
+      document.getElementById('admin-edit-nom').value = adminUser.nom || '';
+      document.getElementById('admin-edit-phone').value = adminUser.telephone || '';
+      
+      document.getElementById('admin-profile-modal').classList.remove('hidden');
+    }
+
+    function closeAdminProfileModal() {
+      document.getElementById('admin-profile-modal').classList.add('hidden');
+    }
+
+    function saveAdminProfile() {
+      if (!adminUser) return;
+      
+      adminUser.prenom = document.getElementById('admin-edit-prenom').value || 'Admin';
+      adminUser.nom = document.getElementById('admin-edit-nom').value || 'Manager';
+      adminUser.telephone = document.getElementById('admin-edit-phone').value;
+      
+      updateAdminHeader();
+      closeAdminProfileModal();
+      showToast('Profil mis à jour', 'success');
+    }
+
+    // INIT
+    initDataSDK();
+    loadFromLocalStorage();
+    updateProfileWidget();
+    initGrids();
+    applyConfig();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d6dcc480172aa9a',t:'MTc3MjU5NDk4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
